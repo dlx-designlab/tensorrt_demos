@@ -22,6 +22,15 @@ from utils.yolo_with_plugins import TrtYOLO
 
 WINDOW_NAME = 'TrtYOLODemo'
 
+# Additions for uvc
+import uvc
+import logging
+logging.basicConfig(level=logging.INFO)
+dev_list = uvc.device_list()
+cap = uvc.Capture(dev_list[0]["uid"])
+cap.frame_mode = cap.available_modes[3]
+cap.get_frame_robust()
+time.sleep(1)
 
 def parse_args():
     """Parse input arguments."""
@@ -57,7 +66,7 @@ def loop_and_detect(cam, trt_yolo, conf_th, vis):
     while True:
         if cv2.getWindowProperty(WINDOW_NAME, 0) < 0:
             break
-        img = cam.read()
+        img = cap.get_frame_robust().bgr #cam.read()
         if img is None:
             break
         boxes, confs, clss = trt_yolo.detect(img, conf_th)
@@ -85,8 +94,8 @@ def main():
         raise SystemExit('ERROR: file (yolo/%s.trt) not found!' % args.model)
 
     cam = Camera(args)
-    if not cam.isOpened():
-        raise SystemExit('ERROR: failed to open camera!')
+    # if not cam.isOpened():
+    #     raise SystemExit('ERROR: failed to open camera!')
 
     cls_dict = get_cls_dict(args.category_num)
     yolo_dim = args.model.split('-')[-1]
@@ -104,7 +113,7 @@ def main():
 
     open_window(
         WINDOW_NAME, 'Camera TensorRT YOLO Demo',
-        cam.img_width, cam.img_height)
+        1920, 1080) #cam.img_width, cam.img_height)
     vis = BBoxVisualization(cls_dict)
     loop_and_detect(cam, trt_yolo, conf_th=0.3, vis=vis)
 
