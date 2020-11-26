@@ -18,7 +18,7 @@ cap.get_frame_robust()
 time.sleep(1)
 
 def main():
-    trt_yolo = TrtYOLO('yolov4-tiny-custom-416', (416, 416), 1)
+    trt_yolo = TrtYOLO('yolov4-tiny-capillary-apex-detector-416', (416, 416), 1)
     while True:
         img = cap.get_frame_robust().bgr
         boxes, confs, clss = trt_yolo.detect(img, 0.3)
